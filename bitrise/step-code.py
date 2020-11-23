@@ -61,6 +61,7 @@ def main():
                 if JIRA_ISSUE_NUMBER_FRAGMENT.isnumeric() and (not (JIRA_ISSUE_NUMBER_FRAGMENT in JIRA_ISSUE_NUMBERS)):
                     print(JIRA_ISSUE_NUMBER_FRAGMENT)
                     JIRA_ISSUE_NUMBERS.append(JIRA_ISSUE_NUMBER_FRAGMENT)
+                    break
                     
         for JIRA_ISSUE_NUMBER in JIRA_ISSUE_NUMBERS:
             JIRA_URL = "https://" + JIRA_ORGANIZATION_NAME + ".atlassian.net/browse/" + JIRA_TEAM_NAME + "-" + JIRA_ISSUE_NUMBER
