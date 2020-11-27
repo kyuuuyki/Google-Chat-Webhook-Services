@@ -25,9 +25,10 @@ def main():
     BITRISE_GIT_MESSAGE = str(sys.argv[11])
     
     BITRISE_PULL_REQUEST = str(sys.argv[12])
+    BITRISEIO_GIT_BRANCH_DEST = str(sys.argv[13])
     
-    TEAM_DEVELOPER_USERIDS = str(sys.argv[13])
-    TEAM_TESTER_USERIDS = str(sys.argv[14])
+    TEAM_DEVELOPER_USERIDS = str(sys.argv[14])
+    TEAM_TESTER_USERIDS = str(sys.argv[15])
 
     """STATUS"""
     if BITRISE_BUILD_STATUS == "0":
@@ -39,8 +40,15 @@ def main():
     if not isStringBlank(BITRISE_PULL_REQUEST):
         BUILD_STATUS_TEXT = "Merge Request #" + BITRISE_PULL_REQUEST + " " + BUILD_STATUS_TEXT
             
-    CHAT_TEXT = "*" + BITRISE_APP_TITLE + " | " + BUILD_STATUS_TEXT + "*\n#" + BITRISE_BUILD_NUMBER + "\n\nBranch: `" + BITRISE_GIT_BRANCH + "`\nWorkflow: `" + BITRISE_TRIGGERED_WORKFLOW_TITLE + "`\nBuild URL: " + BITRISE_BUILD_URL
+    CHAT_TEXT = "*" + BITRISE_APP_TITLE + " | " + BUILD_STATUS_TEXT + "*\n#" + BITRISE_BUILD_NUMBER + "\n"
     
+    """BRANCH DATA"""
+    BRANCH_DATA_TEXT = "\nBranch: `" + BITRISE_GIT_BRANCH + "`"
+    if not isStringBlank(BITRISE_PULL_REQUEST):
+        BRANCH_DATA_TEXT = BRANCH_DATA_TEXT + " → `" + BITRISEIO_GIT_BRANCH_DEST + "`"
+
+    CHAT_TEXT = CHAT_TEXT + BRANCH_DATA_TEXT + "\nWorkflow: `" + BITRISE_TRIGGERED_WORKFLOW_TITLE + "`\nBuild URL: " + BITRISE_BUILD_URL
+
     """PUBLIC INSTALL LINK"""
     if not isStringBlank(BITRISE_PUBLIC_INSTALL_PAGE_URL):
         CHAT_TEXT = CHAT_TEXT + "\nPublic Install URL: " + BITRISE_PUBLIC_INSTALL_PAGE_URL
@@ -55,12 +63,15 @@ def main():
         JIRA_ISSUE_NUMBERS_FRAGMENTS = BITRISE_GIT_MESSAGE.split(JIRA_TEAM_NAME)
         for JIRA_ISSUE_NUMBERS_FRAGMENT in JIRA_ISSUE_NUMBERS_FRAGMENTS:
         
-            JIRA_ISSUE_NUMBER_FRAGMENTS = re.findall(r"[\w'^.#]+", JIRA_ISSUE_NUMBERS_FRAGMENT)
+            JIRA_ISSUE_NUMBER_FRAGMENTS = re.findall(r"[\w']+", JIRA_ISSUE_NUMBERS_FRAGMENT)
             for JIRA_ISSUE_NUMBER_FRAGMENT in JIRA_ISSUE_NUMBER_FRAGMENTS:
                 
-                if JIRA_ISSUE_NUMBER_FRAGMENT.isnumeric() and (not (JIRA_ISSUE_NUMBER_FRAGMENT in JIRA_ISSUE_NUMBERS)):
-                    print(JIRA_ISSUE_NUMBER_FRAGMENT)
-                    JIRA_ISSUE_NUMBERS.append(JIRA_ISSUE_NUMBER_FRAGMENT)
+                if JIRA_ISSUE_NUMBER_FRAGMENT.isnumeric():
+
+                    if not (JIRA_ISSUE_NUMBER_FRAGMENT in JIRA_ISSUE_NUMBERS):
+                        print(JIRA_ISSUE_NUMBER_FRAGMENT)
+                        JIRA_ISSUE_NUMBERS.append(JIRA_ISSUE_NUMBER_FRAGMENT)
+
                     break
                     
         for JIRA_ISSUE_NUMBER in JIRA_ISSUE_NUMBERS:

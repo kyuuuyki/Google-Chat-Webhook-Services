@@ -9,12 +9,19 @@ TEAM_TESTER_USERIDS=''
 
 BITRISE_APP_TITLE='Go Eats - iOS'
 BITRISE_BUILD_STATUS='0'
-BITRISE_BUILD_NUMBER='264'
-BITRISE_TRIGGERED_WORKFLOW_TITLE='adhoc-staging'
-BITRISE_BUILD_URL='https://app.bitrise.io/build/99f56cd6307e7043'
-BITRISE_PUBLIC_INSTALL_PAGE_URL='https://app.bitrise.io/artifact/56442812/p/e108a58974073dd482ba34d4ddb603ff'
-BITRISE_GIT_BRANCH='develop'
-BITRISE_GIT_MESSAGE='Merged in version/1.11.0 (pull request #9)'
-BITRISE_PULL_REQUEST=''
+BITRISE_BUILD_NUMBER='280'
+BITRISE_TRIGGERED_WORKFLOW_TITLE='quality-scan'
+BITRISE_BUILD_URL='https://app.bitrise.io/build/d1cf7525ae2dff5f'
+BITRISE_PUBLIC_INSTALL_PAGE_URL=''
+BITRISE_GIT_BRANCH='version/1.11.1'
+BITRISE_GIT_MESSAGE="Version/1.11.1
+
+* \[COMMOBILE-7831\] Recalculate discountPrice for iphone1250 coupon
+* \[COMMOBILE-7831\] Update CartView's fetchProfile procedure
+* \[COMMOBILE-7831\] Attach promotion object to only first applicable object
+* Version 1.11.1"
+BITRISE_PULL_REQUEST='11'
+BITRISEIO_GIT_BRANCH_DEST='develop'
 
 curl "$GOOGLE_CHAT_WEBHOOK_SERVICES_REPO/bitrise/run-step-code.sh" | bash -
+
