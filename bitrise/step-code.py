@@ -26,9 +26,10 @@ def main():
     
     BITRISE_PULL_REQUEST = str(sys.argv[12])
     BITRISEIO_GIT_BRANCH_DEST = str(sys.argv[13])
+    BITRISEIO_PULL_REQUEST_REPOSITORY_URL = str(sys.argv[14])
     
-    TEAM_DEVELOPER_USERIDS = str(sys.argv[14])
-    TEAM_TESTER_USERIDS = str(sys.argv[15])
+    TEAM_DEVELOPER_USERIDS = str(sys.argv[15])
+    TEAM_TESTER_USERIDS = str(sys.argv[16])
 
     """STATUS"""
     if BITRISE_BUILD_STATUS == "0":
@@ -47,7 +48,26 @@ def main():
     if not isStringBlank(BITRISE_PULL_REQUEST):
         BRANCH_DATA_TEXT = BRANCH_DATA_TEXT + " → `" + BITRISEIO_GIT_BRANCH_DEST + "`"
 
-    CHAT_TEXT = CHAT_TEXT + BRANCH_DATA_TEXT + "\nWorkflow: `" + BITRISE_TRIGGERED_WORKFLOW_TITLE + "`\nBuild URL: " + BITRISE_BUILD_URL
+    """WORKFLOW"""
+    CHAT_TEXT = CHAT_TEXT + BRANCH_DATA_TEXT + "\nWorkflow: `" + BITRISE_TRIGGERED_WORKFLOW_TITLE + "`"
+
+    """BUILD URL"""
+    CHAT_TEXT = CHAT_TEXT + "\n\nBuild URL: " + BITRISE_BUILD_URL
+
+    """PULL REQUEST URL"""
+    if not isStringBlank(BITRISE_PULL_REQUEST):
+        PULL_REQUEST_URL = BITRISEIO_PULL_REQUEST_REPOSITORY_URL.split("@")
+        PULL_REQUEST_URL = PULL_REQUEST_URL[1]
+        PULL_REQUEST_URL = PULL_REQUEST_URL.replace(":", "/")
+        PULL_REQUEST_URL = PULL_REQUEST_URL.replace(".git", "")
+
+        if "bitbucket" in PULL_REQUEST_URL:
+            PULL_REQUEST_URL = PULL_REQUEST_URL + "/pull-requests/" + BITRISE_PULL_REQUEST
+
+        elif "gitlab" in PULL_REQUEST_URL:
+            PULL_REQUEST_URL = PULL_REQUEST_URL + "/-/merge_requests/" + BITRISE_PULL_REQUEST
+
+        CHAT_TEXT = CHAT_TEXT + "\nPull Request URL: https://" + PULL_REQUEST_URL
 
     """PUBLIC INSTALL LINK"""
     if not isStringBlank(BITRISE_PUBLIC_INSTALL_PAGE_URL):
@@ -55,12 +75,14 @@ def main():
 
     """JIRA LINK"""
     if not isStringBlank(BITRISE_GIT_MESSAGE):
-        
+
         print("\nExtracted Jira Issue Number (s):")
     
         JIRA_ISSUE_NUMBERS = []
         
         JIRA_ISSUE_NUMBERS_FRAGMENTS = BITRISE_GIT_MESSAGE.split(JIRA_TEAM_NAME)
+        JIRA_ISSUE_NUMBERS_FRAGMENTS = JIRA_ISSUE_NUMBERS_FRAGMENTS[1:]
+
         for JIRA_ISSUE_NUMBERS_FRAGMENT in JIRA_ISSUE_NUMBERS_FRAGMENTS:
         
             JIRA_ISSUE_NUMBER_FRAGMENTS = re.findall(r"[\w']+", JIRA_ISSUE_NUMBERS_FRAGMENT)
@@ -73,7 +95,8 @@ def main():
                         JIRA_ISSUE_NUMBERS.append(JIRA_ISSUE_NUMBER_FRAGMENT)
 
                     break
-                    
+
+        CHAT_TEXT = CHAT_TEXT + "\n"     
         for JIRA_ISSUE_NUMBER in JIRA_ISSUE_NUMBERS:
             JIRA_URL = "https://" + JIRA_ORGANIZATION_NAME + ".atlassian.net/browse/" + JIRA_TEAM_NAME + "-" + JIRA_ISSUE_NUMBER
             CHAT_TEXT = CHAT_TEXT + "\nJira URL: " + JIRA_URL
