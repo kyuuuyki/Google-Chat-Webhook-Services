@@ -31,6 +31,8 @@ def main():
     TEAM_DEVELOPER_USERIDS = str(sys.argv[15])
     TEAM_TESTER_USERIDS = str(sys.argv[16])
 
+    BUILD_NOTE = str(sys.argv[17])
+
     """STATUS"""
     if BITRISE_BUILD_STATUS == "0":
         BUILD_STATUS_TEXT = "Build Succeeded!"
@@ -39,23 +41,7 @@ def main():
         
     """MERGE STATUS"""
     if not isStringBlank(BITRISE_PULL_REQUEST):
-        BUILD_STATUS_TEXT = "Merge Request #" + BITRISE_PULL_REQUEST + " " + BUILD_STATUS_TEXT
-            
-    CHAT_TEXT = "*" + BITRISE_APP_TITLE + " | " + BUILD_STATUS_TEXT + "*\n#" + BITRISE_BUILD_NUMBER + "\n"
-    
-    """BRANCH DATA"""
-    BRANCH_DATA_TEXT = "\nBranch: `" + BITRISE_GIT_BRANCH + "`"
-    if not isStringBlank(BITRISE_PULL_REQUEST):
-        BRANCH_DATA_TEXT = BRANCH_DATA_TEXT + " → `" + BITRISEIO_GIT_BRANCH_DEST + "`"
 
-    """WORKFLOW"""
-    CHAT_TEXT = CHAT_TEXT + BRANCH_DATA_TEXT + "\nWorkflow: `" + BITRISE_TRIGGERED_WORKFLOW_TITLE + "`"
-
-    """BUILD URL"""
-    CHAT_TEXT = CHAT_TEXT + "\n\nBuild URL: " + BITRISE_BUILD_URL
-
-    """PULL REQUEST URL"""
-    if not isStringBlank(BITRISE_PULL_REQUEST):
         PULL_REQUEST_URL = BITRISEIO_PULL_REQUEST_REPOSITORY_URL.split("@")
         PULL_REQUEST_URL = PULL_REQUEST_URL[1]
         PULL_REQUEST_URL = PULL_REQUEST_URL.replace(":", "/")
@@ -67,14 +53,33 @@ def main():
         elif "gitlab" in PULL_REQUEST_URL:
             PULL_REQUEST_URL = PULL_REQUEST_URL + "/-/merge_requests/" + BITRISE_PULL_REQUEST
 
-        CHAT_TEXT = CHAT_TEXT + "\nPull Request URL: https://" + PULL_REQUEST_URL
+        BUILD_STATUS_TEXT = "Merge Request <https://" + PULL_REQUEST_URL + "|#" + BITRISE_PULL_REQUEST + "> " + BUILD_STATUS_TEXT
+            
+    CHAT_TEXT = "*" + BITRISE_APP_TITLE + " | " + BUILD_STATUS_TEXT + "*"
+
+    """BUILD NUMBER"""
+    CHAT_TEXT = CHAT_TEXT + "\n<" + BITRISE_BUILD_URL + "|#" + BITRISE_BUILD_NUMBER + ">"
 
     """PUBLIC INSTALL LINK"""
     if not isStringBlank(BITRISE_PUBLIC_INSTALL_PAGE_URL):
-        CHAT_TEXT = CHAT_TEXT + "\nPublic Install URL: " + BITRISE_PUBLIC_INSTALL_PAGE_URL
+        CHAT_TEXT = CHAT_TEXT + " • <" + BITRISE_PUBLIC_INSTALL_PAGE_URL + "|Open public install page>"
+
+    CHAT_TEXT = CHAT_TEXT + "\n"
+
+    """BUILD NOTE"""
+    if not isStringBlank(BUILD_NOTE):
+        CHAT_TEXT = CHAT_TEXT + "\n" + BUILD_NOTE + "\n"
+    
+    """BRANCH DATA"""
+    BRANCH_DATA_TEXT = "\nBranch: `" + BITRISE_GIT_BRANCH + "`"
+    if not isStringBlank(BITRISE_PULL_REQUEST):
+        BRANCH_DATA_TEXT = BRANCH_DATA_TEXT + " → `" + BITRISEIO_GIT_BRANCH_DEST + "`"
+
+    """WORKFLOW"""
+    CHAT_TEXT = CHAT_TEXT + BRANCH_DATA_TEXT + "\nWorkflow: `" + BITRISE_TRIGGERED_WORKFLOW_TITLE + "`"
 
     """JIRA LINK"""
-    if not isStringBlank(BITRISE_GIT_MESSAGE):
+    if not isStringBlank(BITRISE_GIT_MESSAGE) and not isStringBlank(JIRA_TEAM_NAME):
 
         print("\nExtracted Jira Issue Number (s):")
     
@@ -96,10 +101,15 @@ def main():
 
                     break
 
-        CHAT_TEXT = CHAT_TEXT + "\n"     
-        for JIRA_ISSUE_NUMBER in JIRA_ISSUE_NUMBERS:
-            JIRA_URL = "https://" + JIRA_ORGANIZATION_NAME + ".atlassian.net/browse/" + JIRA_TEAM_NAME + "-" + JIRA_ISSUE_NUMBER
-            CHAT_TEXT = CHAT_TEXT + "\nJira URL: " + JIRA_URL
+        if len(JIRA_ISSUE_NUMBERS) > 0:
+
+            CHAT_TEXT = CHAT_TEXT + "\nJira Task(s): "
+
+            for JIRA_ISSUE_NUMBER in JIRA_ISSUE_NUMBERS:
+                JIRA_URL = "https://" + JIRA_ORGANIZATION_NAME + ".atlassian.net/browse/" + JIRA_TEAM_NAME + "-" + JIRA_ISSUE_NUMBER
+                CHAT_TEXT = CHAT_TEXT + "<" + JIRA_URL + "|" + JIRA_TEAM_NAME + "-" + JIRA_ISSUE_NUMBER + ">, "
+
+            CHAT_TEXT = CHAT_TEXT[:-2]
         
     """GIT MESSAGE"""
     if not isStringBlank(BITRISE_GIT_MESSAGE):
@@ -128,8 +138,12 @@ def main():
             print(TEAM_TESTER_ID)
             USER_IDS.append(TEAM_TESTER_ID)
             
-    for USER_ID in USER_IDS:
-        CHAT_TEXT = CHAT_TEXT + "<users/" + USER_ID + "> "
+    if len(USER_IDS) > 0:
+
+        CHAT_TEXT = CHAT_TEXT + "\n"
+
+        for USER_ID in USER_IDS:
+            CHAT_TEXT = CHAT_TEXT + "<users/" + USER_ID + "> "
         
     """POST MESSAGE"""
     bot_message = {
