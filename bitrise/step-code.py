@@ -33,6 +33,9 @@ def main():
 
     BUILD_NOTE = str(sys.argv[17])
 
+    """INTERNAL VARIABLES"""
+    THREAD_KEY = ""
+
     """STATUS"""
     if BITRISE_BUILD_STATUS == "0":
         BUILD_STATUS_TEXT = "Build Succeeded!"
@@ -54,6 +57,7 @@ def main():
             PULL_REQUEST_URL = PULL_REQUEST_URL + "/-/merge_requests/" + BITRISE_PULL_REQUEST
 
         BUILD_STATUS_TEXT = "Merge Request <https://" + PULL_REQUEST_URL + "|#" + BITRISE_PULL_REQUEST + "> " + BUILD_STATUS_TEXT
+        THREAD_KEY = re.sub('[^A-Za-z0-9]+', '', BITRISE_APP_TITLE) + "-MERGE_REQUEST-" + BITRISE_PULL_REQUEST
             
     CHAT_TEXT = "*" + BITRISE_APP_TITLE + " | " + BUILD_STATUS_TEXT + "*"
 
@@ -153,8 +157,12 @@ def main():
 
     http_obj = Http()
 
+    URL = GOOGLE_CHAT_WEBHOOK_URL
+    if (not isStringBlank(TEAM_DEVELOPER_USERIDS)):
+        URL = URL + "&threadKey=" + THREAD_KEY
+
     response = http_obj.request(
-        uri=GOOGLE_CHAT_WEBHOOK_URL,
+        uri=URL,
         method='POST',
         headers=message_headers,
         body=dumps(bot_message),
