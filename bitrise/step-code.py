@@ -36,15 +36,21 @@ def getBuildStatusIcon(buildStatus):
         return "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/144/apple/271/fire_1f525.png"
 
 def getMergeRequestURL(mergeRequestNumber, repositoryURL):
-    PULL_REQUEST_URL = repositoryURL.split("@")
-    PULL_REQUEST_URL = PULL_REQUEST_URL[1]
-    PULL_REQUEST_URL = PULL_REQUEST_URL.replace(":", "/")
-    PULL_REQUEST_URL = PULL_REQUEST_URL.replace(".git", "")
 
-    if "bitbucket" in PULL_REQUEST_URL:
-        PULL_REQUEST_URL = PULL_REQUEST_URL + "/pull-requests/" + mergeRequestNumber
-    elif "gitlab" in PULL_REQUEST_URL:
-        PULL_REQUEST_URL = PULL_REQUEST_URL + "/-/merge_requests/" + mergeRequestNumber
+    PULL_REQUEST_URL = ""
+
+    try:
+        PULL_REQUEST_URL = repositoryURL.split("@")
+        PULL_REQUEST_URL = PULL_REQUEST_URL[1]
+        PULL_REQUEST_URL = PULL_REQUEST_URL.replace(":", "/")
+        PULL_REQUEST_URL = PULL_REQUEST_URL.replace(".git", "")
+
+        if "bitbucket" in PULL_REQUEST_URL:
+            PULL_REQUEST_URL = PULL_REQUEST_URL + "/pull-requests/" + mergeRequestNumber
+        elif "gitlab" in PULL_REQUEST_URL:
+            PULL_REQUEST_URL = PULL_REQUEST_URL + "/-/merge_requests/" + mergeRequestNumber
+    except:
+        print("An exception occurred")
 
     return PULL_REQUEST_URL
 
