@@ -2,6 +2,7 @@ pip3 install -t . httplib2 --upgrade
 
 curl "$GOOGLE_CHAT_WEBHOOK_SERVICES_REPO/bitrise/step-code.py" | python3 - \
 "$GOOGLE_CHAT_WEBHOOK_URL" \
+"$GOOGLE_CHAT_WEBHOOK_SERVICES_REPO" \
 "$JIRA_ORGANIZATION_NAME" \
 "$JIRA_TEAM_NAME" \
 "$BITRISE_APP_TITLE" \

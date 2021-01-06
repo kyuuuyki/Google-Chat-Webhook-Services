@@ -16,12 +16,12 @@ def getThreadKey(applicationName, mergeRequestNumber):
 
     return threadKey
 
-def getConfigurations(configurationString):
-    CONFIGURATIONS = []
+def getConfigurationOptions(configurationString):
+    configurationOptions = []
     if not isStringBlank(configurationString):
-        CONFIGURATIONS = re.findall(r"[\w']+", configurationString)
-        print(CONFIGURATIONS)
-    return CONFIGURATIONS
+        configurationOptions = re.findall(r"[\w']+", configurationString)
+        print(configurationOptions)
+    return configurationOptions
 
 def getBuildStatusTitle(buildStatus):
     if buildStatus == "0":
@@ -29,130 +29,126 @@ def getBuildStatusTitle(buildStatus):
     else:
         return "Build Failed"
 
-def getBuildStatusIcon(buildStatus):
+def getBuildStatusIcon(scriptRepositoryURL, buildStatus):
     if buildStatus == "0":
-        return "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/144/apple/271/party-popper_1f389.png"
+        return scriptRepositoryURL + "/assets/images/check-mark.png"
     else:
-        return "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/144/apple/271/fire_1f525.png"
+        return scriptRepositoryURL + "/assets/images/cross-mark.png"
 
 def getMergeRequestURL(mergeRequestNumber, repositoryURL):
-
-    PULL_REQUEST_URL = ""
-
+    mergeRequestURL = ""
     try:
-        PULL_REQUEST_URL = repositoryURL.split("@")
-        PULL_REQUEST_URL = PULL_REQUEST_URL[1]
-        PULL_REQUEST_URL = PULL_REQUEST_URL.replace(":", "/")
-        PULL_REQUEST_URL = PULL_REQUEST_URL.replace(".git", "")
+        mergeRequestURL = repositoryURL.split("@")
+        mergeRequestURL = mergeRequestURL[1]
+        mergeRequestURL = mergeRequestURL.replace(":", "/")
+        mergeRequestURL = mergeRequestURL.replace(".git", "")
 
-        if "bitbucket" in PULL_REQUEST_URL:
-            PULL_REQUEST_URL = PULL_REQUEST_URL + "/pull-requests/" + mergeRequestNumber
-        elif "gitlab" in PULL_REQUEST_URL:
-            PULL_REQUEST_URL = PULL_REQUEST_URL + "/-/merge_requests/" + mergeRequestNumber
+        if "bitbucket" in mergeRequestURL:
+            mergeRequestURL = mergeRequestURL + "/pull-requests/" + mergeRequestNumber
+        elif "gitlab" in mergeRequestURL:
+            mergeRequestURL = mergeRequestURL + "/-/merge_requests/" + mergeRequestNumber
     except:
-        print("An exception occurred")
+        print("Could not extract Merge Request URL")
 
-    return PULL_REQUEST_URL
+    return mergeRequestURL
 
 def getJIRAContent(gitMessage, jiraOrganizationName, jiraTeamName):
     jiraContent = ""
     if not isStringBlank(gitMessage) and not isStringBlank(jiraTeamName):
         print("\nExtracted Jira Issue Number (s):")
     
-        JIRA_ISSUE_NUMBERS = []
+        jiraIssueNumbers = []
         
-        JIRA_ISSUE_NUMBERS_FRAGMENTS = gitMessage.split(jiraTeamName)
-        JIRA_ISSUE_NUMBERS_FRAGMENTS = JIRA_ISSUE_NUMBERS_FRAGMENTS[1:]
+        jiraIssueNumbersFragments = gitMessage.split(jiraTeamName)
+        jiraIssueNumbersFragments = jiraIssueNumbersFragments[1:]
 
-        for JIRA_ISSUE_NUMBERS_FRAGMENT in JIRA_ISSUE_NUMBERS_FRAGMENTS:
+        for jiraIssueNumbersFragment in jiraIssueNumbersFragments:
         
-            JIRA_ISSUE_NUMBER_FRAGMENTS = re.findall(r"[\w']+", JIRA_ISSUE_NUMBERS_FRAGMENT)
-            for JIRA_ISSUE_NUMBER_FRAGMENT in JIRA_ISSUE_NUMBER_FRAGMENTS:
+            jiraIssueNumberFragments = re.findall(r"[\w']+", jiraIssueNumbersFragment)
+            for jiraIssueNumberFragment in jiraIssueNumberFragments:
                 
-                if JIRA_ISSUE_NUMBER_FRAGMENT.isnumeric():
+                if jiraIssueNumberFragment.isnumeric():
 
-                    if not (JIRA_ISSUE_NUMBER_FRAGMENT in JIRA_ISSUE_NUMBERS):
-                        print(JIRA_ISSUE_NUMBER_FRAGMENT)
-                        JIRA_ISSUE_NUMBERS.append(JIRA_ISSUE_NUMBER_FRAGMENT)
+                    if not (jiraIssueNumberFragment in jiraIssueNumbers):
+                        print(jiraIssueNumberFragment)
+                        jiraIssueNumbers.append(jiraIssueNumberFragment)
 
                     break
 
-        if len(JIRA_ISSUE_NUMBERS) > 0:
-
-            for JIRA_ISSUE_NUMBER in JIRA_ISSUE_NUMBERS:
-                JIRA_URL = "https://" + jiraOrganizationName + ".atlassian.net/browse/" + jiraTeamName + "-" + JIRA_ISSUE_NUMBER
-                jiraContent = jiraContent + "<a href=" + JIRA_URL + ">" + jiraTeamName + "-" + JIRA_ISSUE_NUMBER + "</a><br>"
+        if len(jiraIssueNumbers) > 0:
+            for jiraIssueNumber in jiraIssueNumbers:
+                jiraIssueURL = "https://" + jiraOrganizationName + ".atlassian.net/browse/" + jiraTeamName + "-" + jiraIssueNumber
+                jiraContent = jiraContent + "<a href=" + jiraIssueURL + ">" + jiraTeamName + "-" + jiraIssueNumber + "</a><br>"
 
     return jiraContent
 
 def getTaggedUsersContent(developerUserIDs, testerUserIDs, mergeRequestNumber, buildInstallURL):
     usersContent = ""
-    USER_IDS = []
+    taggedUserIDs = []
     
     if (not isStringBlank(developerUserIDs)) and (not isStringBlank(mergeRequestNumber)):
-        
         print("\nExtracted Developer UserID (s):")
         
-        TEAM_DEVELOPER_IDS = re.findall(r"[\w']+", developerUserIDs)
-        for TEAM_DEVELOPER_ID in TEAM_DEVELOPER_IDS:
+        developerIDs = re.findall(r"[\w']+", developerUserIDs)
+        for developerID in developerIDs:
         
-            print(TEAM_DEVELOPER_ID)
-            USER_IDS.append(TEAM_DEVELOPER_ID)
+            print(developerID)
+            taggedUserIDs.append(developerID)
     
     if (not isStringBlank(testerUserIDs)) and (not isStringBlank(buildInstallURL)):
-        
         print("\nExtracted Tester UserID (s):")
         
-        TEAM_TESTER_IDS = re.findall(r"[\w']+", testerUserIDs)
-        for TEAM_TESTER_ID in TEAM_TESTER_IDS:
+        testerIDs = re.findall(r"[\w']+", testerUserIDs)
+        for testerID in testerIDs:
         
-            print(TEAM_TESTER_ID)
-            USER_IDS.append(TEAM_TESTER_ID)
+            print(testerID)
+            taggedUserIDs.append(testerID)
             
-    if len(USER_IDS) > 0:
-        for USER_ID in USER_IDS:
-            usersContent = usersContent + "<users/" + USER_ID + "> "
+    if len(taggedUserIDs) > 0:
+        for taggedUserID in taggedUserIDs:
+            usersContent = usersContent + "<users/" + taggedUserID + "> "
 
     return usersContent
 
 def main():
 
     scriptURL = str(sys.argv[1])
+    scriptRepositoryURL = str(sys.argv[2])
 
-    jiraOrganizationName = str(sys.argv[2])
-    jiraTeamName = str(sys.argv[3])
+    jiraOrganizationName = str(sys.argv[3])
+    jiraTeamName = str(sys.argv[4])
 
-    applicationName = str(sys.argv[4])
+    applicationName = str(sys.argv[5])
 
-    buildStatus = str(sys.argv[5])
-    buildNumber = str(sys.argv[6])
-    buildWorkflowName = str(sys.argv[7])
-    buildURL = str(sys.argv[8])
-    buildInstallURL = str(sys.argv[9])
+    buildStatus = str(sys.argv[6])
+    buildNumber = str(sys.argv[7])
+    buildWorkflowName = str(sys.argv[8])
+    buildURL = str(sys.argv[9])
+    buildInstallURL = str(sys.argv[10])
 
-    gitBranchName = str(sys.argv[10])
-    gitMessage = str(sys.argv[11])
+    gitBranchName = str(sys.argv[11])
+    gitMessage = str(sys.argv[12])
     
-    mergeRequestNumber = str(sys.argv[12])
-    mergeRequestDestinationBranchName = str(sys.argv[13])
+    mergeRequestNumber = str(sys.argv[13])
+    mergeRequestDestinationBranchName = str(sys.argv[14])
 
-    repositoryURL = str(sys.argv[14])
+    repositoryURL = str(sys.argv[15])
     
-    developerUserIDs = str(sys.argv[15])
-    testerUserIDs = str(sys.argv[16])
+    developerUserIDs = str(sys.argv[16])
+    testerUserIDs = str(sys.argv[17])
 
-    buildNote = str(sys.argv[17])
+    buildNote = str(sys.argv[18])
 
-    configurationString = str(sys.argv[18])
+    configurationString = str(sys.argv[19])
 
     """INTERNAL VARIABLES"""
     threadKey = getThreadKey(applicationName, mergeRequestNumber)
-    configurationOptions = getConfigurations(configurationString)
+    configurationOptions = getConfigurationOptions(configurationString)
 
     """Card Header"""
     cardHeaderTitle = "<b>" + getBuildStatusTitle(buildStatus) + "</b>"
     cardHeaderSubtitle = applicationName + " | " + gitBranchName
-    cardHeaderImageUrl = getBuildStatusIcon(buildStatus)
+    cardHeaderImageUrl = getBuildStatusIcon(scriptRepositoryURL, buildStatus)
     cardHeader = {
         "title": cardHeaderTitle, 
         "subtitle": cardHeaderSubtitle,
@@ -164,6 +160,7 @@ def main():
     
     """Merge Request Section"""
     mergeRequestURL = getMergeRequestURL(mergeRequestNumber, repositoryURL)
+    mergeRequestIconURL = scriptRepositoryURL + "/assets/images/mr.png"
     if not isStringBlank(mergeRequestNumber):
         mergeRequestSection = {
             "widgets": [
@@ -177,7 +174,7 @@ def main():
                                 "url": mergeRequestURL
                             }
                         },
-                        "iconUrl": "https://www.seekicon.com/free-icon-download/git-pull-request-outline-icon_1.png",
+                        "iconUrl": mergeRequestIconURL,
                         "button": {
                             "textButton": {
                                 "text": "#" + mergeRequestNumber,
@@ -305,12 +302,12 @@ def main():
 
     http_obj = Http()
 
-    URL = scriptURL
+    postURL = scriptURL
     if not isStringBlank(threadKey):
-        URL = URL + "&threadKey=" + threadKey
+        postURL = postURL + "&threadKey=" + threadKey
 
     response = http_obj.request(
-        uri=URL,
+        uri=postURL,
         method='POST',
         headers=message_headers,
         body=dumps(bot_message),
